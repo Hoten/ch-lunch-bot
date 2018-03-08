@@ -1,0 +1,6 @@
+#!/bin/bash
+
+yarn install
+docker pull lambci/lambda:build-python3.6
+pip-compile --output-file requirements.txt requirements/requirements.in
+serverless deploy --stage staging

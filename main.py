@@ -111,7 +111,7 @@ def run(dry_run):
   if (not dry_run):
     post(message)
 
-def lambda_handler(event, context):
+def call(event, context):
   dry_run = hasattr(event, 'dry_run') and event.dry_run
   run(dry_run)
   return 'Done'
