@@ -94,6 +94,7 @@ def post(message):
     'chat.postMessage',
     channel='#lunch',
     username='LunchBot',
+    icon_emoji=':eating:',
     text=message
   )
 
