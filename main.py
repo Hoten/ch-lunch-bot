@@ -112,6 +112,6 @@ def run(dry_run):
     post(message)
 
 def call(event, context):
-  dry_run = hasattr(event, 'dry_run') and event.dry_run
+  dry_run = 'dry_run' in event and event['dry_run']
   run(dry_run)
   return 'Done'
