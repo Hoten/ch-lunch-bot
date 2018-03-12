@@ -6,10 +6,11 @@ from slackclient import SlackClient
 DISCOUNT_RATE = 0.6
 
 class MenuSection:
-  def __init__(self, name, entree, ingredients, prices):
+  def __init__(self, name, entree, ingredients, macros, prices):
     self.name = name
     self.entree = entree
     self.ingredients = ingredients
+    self.macros = macros
     self.prices = prices
 
   def __repr__(self):
@@ -47,18 +48,28 @@ def parse_sections(all_elems):
       name = elems_for_section[0].get_text().strip()
       entree = elems_for_section[1].get_text().strip()
       ingredients = None
+      macros = None
       prices = parse_prices(elems_for_section[2].get_text())
 
     if length == 4:
       name = elems_for_section[0].get_text().strip()
       entree = elems_for_section[1].get_text().strip()
       ingredients = elems_for_section[2].replace('Ingredients: ', '').strip()
+      macros = None
       prices = parse_prices(elems_for_section[3].get_text())
+
+    if length == 5:
+      name = elems_for_section[0].get_text().strip()
+      entree = elems_for_section[1].get_text().strip()
+      ingredients = elems_for_section[2].replace('Ingredients: ', '').strip()
+      macros = elems_for_section[3].get_text().strip()
+      prices = parse_prices(elems_for_section[4].get_text())
 
     sections.append(MenuSection(
       name,
       entree,
       ingredients,
+      macros,
       prices
     ))
 
@@ -75,6 +86,9 @@ def render_message(sections):
     
     if section.ingredients:
       lines.append(f'{section.ingredients}')
+
+    if section.macros:
+      lines.append(f'{section.macros}')
 
     discounted_prices = [round(p * DISCOUNT_RATE, 2) for p in section.prices]
     lines.append(f'~{format_prices(section.prices)}~ {format_prices(discounted_prices)}')

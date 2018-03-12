@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 yarn install
 docker pull lambci/lambda:build-python3.6
