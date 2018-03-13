@@ -16,6 +16,17 @@ class MenuSection:
   def __repr__(self):
     return str(self.__dict__)
 
+
+def is_float(value):
+    try:
+      float(value)
+      return True
+    except ValueError:
+      return False
+
+def apply_discount(p):
+  return round(p * DISCOUNT_RATE, 2) if is_float(p) else f'{p} (minus discount)'
+
 def get_soup(today):
   dayofweek = today.weekday()
   last_monday = today - timedelta(days=dayofweek)
@@ -26,7 +37,7 @@ def get_soup(today):
 
 def parse_sections(all_elems):
   def parse_prices(text):
-    return [float(x) for x in text.split('/')]
+    return [(float(x) if is_float(x) else x) for x in text.split('/')]
 
   grouped_elems = []
 
@@ -77,7 +88,7 @@ def parse_sections(all_elems):
 
 def render_message(sections):
   def format_prices(prices):
-    return '/'.join(['${:,.2f}'.format(p) for p in prices])
+    return '/'.join([('${:,.2f}'.format(p) if is_float(p) else p) for p in prices])
 
   lines = []
   for section in sections:
@@ -90,7 +101,7 @@ def render_message(sections):
     if section.macros:
       lines.append(f'{section.macros}')
 
-    discounted_prices = [round(p * DISCOUNT_RATE, 2) for p in section.prices]
+    discounted_prices = [apply_discount(p) for p in section.prices]
     lines.append(f'~{format_prices(section.prices)}~ {format_prices(discounted_prices)}')
     lines.append('')
 
