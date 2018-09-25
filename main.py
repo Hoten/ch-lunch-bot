@@ -1,4 +1,4 @@
-import urllib.request, re, os
+import urllib.request, re, os, json
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup
 from slackclient import SlackClient
@@ -111,17 +111,33 @@ def ensure(condition):
   if not condition:
     raise Exception('data not good')
 
-def post(message):
+def post(message, channel):
   slack_token = os.environ['SLACK_API_TOKEN']
   sc = SlackClient(slack_token)
 
   sc.api_call(
     'chat.postMessage',
-    channel='#lunch',
+    channel=channel,
     username='LunchBot',
     icon_emoji=':eating:',
-    text=message
+    text=message,
+    unfurl_media=True,
+    unfurl_links=True
   )
+
+def get_burrito():
+  giphy_token = os.environ['GIPHY_API_TOKEN']
+  raw_data = urllib.request.urlopen(f"https://api.giphy.com/v1/gifs/random?api_key={giphy_token}&tag=burrito&rating=PG").read()
+  data = json.loads(raw_data.decode('utf-8'))['data']
+  images = data['images']
+  
+  if 'fixed_width' in images:
+    return images['fixed_width']['url']
+
+  if 'downsized' in images:
+    return images['downsized']['url']
+
+  return images['embed_url']
 
 def run(dry_run):
   today = datetime.today()
@@ -135,7 +151,9 @@ def run(dry_run):
   
   print(message)
   if (not dry_run):
-    post(message)
+    post(message, '#lunch')
+    if re.search('burrito', message, re.IGNORECASE):
+      post("It's Burrito Day!\n" + get_burrito(), '@kevinwilde')
 
 def call(event, context):
   dry_run = 'dry_run' in event and event['dry_run']
